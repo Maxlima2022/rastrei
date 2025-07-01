@@ -2,52 +2,50 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Rastreamento com Número</title>
+  <title>Rastreamento com Permissão</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
     }
     header {
-      background-color: #1a73e8;
-      color: white;
+      background-color: #222;
+      color: #fff;
       text-align: center;
-      padding: 15px;
+      padding: 12px;
     }
     #formulario {
-      padding: 20px;
       text-align: center;
+      margin: 20px;
     }
     input[type="text"] {
       padding: 10px;
-      width: 250px;
       font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      width: 250px;
     }
     button {
       padding: 10px 20px;
       font-size: 16px;
-      margin-left: 10px;
       background-color: #1a73e8;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
+      margin-left: 10px;
+      cursor: pointer;
     }
     #mapa {
-      height: 75vh;
+      height: 70vh;
       width: 100%;
     }
   </style>
 </head>
 <body>
-
   <header>
-    <h2>🛰️ Rastrear Localização por Número de Telefone</h2>
+    <h2>🛰️ Rastreamento com Geolocalização (com Permissão)</h2>
   </header>
 
   <div id="formulario">
-    <input type="text" id="telefone" placeholder="Digite seu número (ex: 11999999999)" />
+    <input type="text" id="telefone" placeholder="Digite seu número de telefone">
     <button onclick="iniciarRastreamento()">Rastrear</button>
   </div>
 
@@ -56,72 +54,54 @@
   <script>
     let mapa;
     let marcador;
-    let numeroTelefone = "";
 
     function iniciarRastreamento() {
-      numeroTelefone = document.getElementById("telefone").value.trim();
+      const numero = document.getElementById("telefone").value.trim();
 
-      if (numeroTelefone === "") {
-        alert("Por favor, digite um número de telefone válido.");
+      if (numero === "") {
+        alert("Digite um número de telefone para continuar.");
         return;
       }
 
-      initMap();
-    }
-
-    function initMap() {
-      mapa = new google.maps.Map(document.getElementById("mapa"), {
-        center: { lat: -23.55052, lng: -46.63331 },
-        zoom: 16
-      });
-
       if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
+        // Esta função ativa a solicitação de permissão do navegador
+        navigator.geolocation.getCurrentPosition(
           (posicao) => {
             const latitude = posicao.coords.latitude;
             const longitude = posicao.coords.longitude;
-            const posicaoAtual = { lat: latitude, lng: longitude };
 
-            mapa.setCenter(posicaoAtual);
-
-            if (!marcador) {
-              marcador = new google.maps.Marker({
-                position: posicaoAtual,
-                map: mapa,
-                title: "Você está aqui!",
-              });
-            } else {
-              marcador.setPosition(posicaoAtual);
-            }
-
-            // Aqui você pode enviar para servidor PHP se quiser salvar:
-            /*
-            fetch("salvar_localizacao.php", {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: "numero_telefone=" + numeroTelefone + "&latitude=" + latitude + "&longitude=" + longitude
-            });
-            */
+            // Inicializa o mapa com as coordenadas
+            initMap(latitude, longitude);
           },
           (erro) => {
-            alert("❌ Permissão de localização negada.");
-          },
-          {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 10000
+            alert("❌ Permissão de localização negada. O rastreamento não funcionará.");
           }
         );
       } else {
-        alert("❌ Geolocalização não suportada pelo seu navegador.");
+        alert("Seu navegador não suporta geolocalização.");
       }
+    }
+
+    function initMap(lat, lng) {
+      const posicaoAtual = { lat: lat, lng: lng };
+
+      mapa = new google.maps.Map(document.getElementById("mapa"), {
+        center: posicaoAtual,
+        zoom: 16,
+      });
+
+      marcador = new google.maps.Marker({
+        position: posicaoAtual,
+        map: mapa,
+        title: "Você está aqui!"
+      });
     }
   </script>
 
-  <!-- Substitua SUA_CHAVE_API abaixo -->
+  <!-- ✅ Google Maps - substitua SUA_CHAVE_API pela sua chave real -->
+  
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_API&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=https://alertcenter.googleapis.com">
   </script>
-
 </body>
 </html>
